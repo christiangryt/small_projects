@@ -32,7 +32,7 @@ def ruller(arr):
                     y = j + dir[1]
                     
                     try:
-                        if x <= 0 or y <= 0:
+                        if x < 0 or y < 0:
                             continue
 
                         nabo = arr[x][y]
@@ -48,6 +48,7 @@ def ruller(arr):
                 if nabo_teller < max_nabo:
                     print ("Good")
                     accessable += 1
+                    continue
             
     print (accessable)
 
@@ -68,7 +69,7 @@ eksempel =  [
 
 #ruller(eksempel)
 
-with open("4/data-test.txt") as f:
+with open("data-test.txt") as f:
     
     matrise = []
 
