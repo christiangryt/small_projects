@@ -104,7 +104,7 @@ class boid(pygame.sprite.Sprite):
         #pygame.draw.rect(screen, black, pygame.Rect(perceived_center, [5, 5]))
 
         perceived_velocity = (perceived_velocity - self.speed) / math.exp(8)
-        perceived_center = (perceived_center - self.get_pos_vector()) / math.exp(9)
+        perceived_center = (perceived_center - self.get_pos_vector()) / math.exp(8.5)
         c = c / 30
 
         #pygame.draw.circle(self.screen, black, self.get_pos_vector(), self.sight_range, 1)

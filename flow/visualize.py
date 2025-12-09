@@ -41,7 +41,7 @@ class path_window():
 
 class drawer():
 
-    def __init__(self, graph, stdscr, flows):
+    def __init__(self, graph, stdscr):
 
         # Graph
         self.graph = graph
@@ -81,14 +81,15 @@ class drawer():
                rest_space_window_margin)
         """
 
-        for i, flow in enumerate(flows):
-            self.windows[flow.state] = path_window(
-                    self.window_height,
-                    self.window_width,
-                    self.start_x + ((i % self.max_windows_per_row) * (self.window_width + 2 * self.window_padding)),
-                    (i // self.max_windows_per_row) * (self.window_height + self.window_padding - 2),
-                    self.character_padding
-                )
+        # TODO: Create drawer in CBS?
+        #for i, flow in enumerate(flows):
+        #    self.windows[flow.state] = path_window(
+        #            self.window_height,
+        #            self.window_width,
+        #            self.start_x + ((i % self.max_windows_per_row) * (self.window_width + 2 * self.window_padding)),
+        #            (i // self.max_windows_per_row) * (self.window_height + self.window_padding - 2),
+        #            self.character_padding
+        #        )
 
     def draw(self):
         self.stdscr.addstr(0,0, "HHHEHE")

@@ -20,7 +20,7 @@ class flow():
         """
 
         self.graph = graph
-        self.state = state              # Symbol for Terminals
+        self.state = state              # Symbol for Terminals {A,B,C...}
         self.terminals = terminals
         self.path = []              # My way of storing the solution, might need a looker
 
@@ -65,12 +65,16 @@ class CBS_solver():
     Flow class keeps track of a single path, this keeps track of all tracks
     """
 
-    def __init__(self, graph,drawer=None, with_curses=False):
+    def __init__(self, graph, with_curses=False, curses=None, drawer=None):
 
         self.flows = []
         self.graph = graph
 
-        # output to curses
+        # Only set curses variables if solver has curses scope
+        if with_curses:
+            self.curses = curses
+            self.drawer = drawer
+
         self.with_curses = with_curses
 
         # First make flow objects from all_terminals list
@@ -93,13 +97,13 @@ class CBS_solver():
 
     def amount_constraints(self, constraints):
 
-        ut = []
+        ut = 0
         #print (constraints)
 
         for con in constraints.values():
-            ut += con
+            ut += len(con)
 
-        return len(ut)
+        return ut
 
     def solve_terminals(self):
 
@@ -108,18 +112,51 @@ class CBS_solver():
         for flow in self.flows:
             flow.solve_terminal()
 
+            # TODO: Do i need to give both flow and flow.path? (i forgor)
             # Make sure no new objects are created from this
             paths.append((flow, flow.path))
 
         return paths
 
-    # Should CBS have any visuals?
-    def display_all_flows(self, with_curses=False):
+    def display_flow(self, flow, reset=True):
         """
+        Sets state and returns board
+
+        Uses self.with_curses
+        with_curses [ bool  ]:
+            False   Print board
+
+            True    Return board with flow state
+
+        flow [ flow object ]
+
+        reset [ bool  ]:
+            True call graph.reset_node_states()
+
+            False dontnt' do that
+        """
+
+        for n in flow.path:
+            n.state = flow.state.lower()
+
+        # No curses
+        if self.with_curses == False:
+            if reset == True:
+                self.graph.display_graph()
+                self.graph.reset_node_states()
+
+        else:
+            if reset == True:
+                None
+
+    def display_all_flows(self):
+        """
+        Uses self.with_curses
+
         with_curses:
             False   Print each board
 
-            True    Return List of nested boards
+            True    Return boards with state for each flow
         """
 
         None
@@ -167,7 +204,6 @@ class CBS_solver():
         constraints = defaultdict(set)
 
         constraint_cost = self.amount_constraints(constraints)
-        counter = itertools.count()
         self.set_constraints(constraints)
         paths = self.solve_terminals()
         cost = self.board_fill(paths)
@@ -176,7 +212,7 @@ class CBS_solver():
 
         # Solutions to check
         open = []
-        heapq.heappush(open, (constraint_cost, cost, next(counter), root))
+        heapq.heappush(open, (constraint_cost, cost, iteration_count, root))
 
         while open:
 
@@ -243,4 +279,4 @@ class CBS_solver():
                         node.state = flow.state.lower()
                     self.graph.display_graph()
 
-                heapq.heappush(open, (node_cost, new_cost, next(counter), new_cbs_node))
+                heapq.heappush(open, (node_cost, new_cost, iteration_count, new_cbs_node))

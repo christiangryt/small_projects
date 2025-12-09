@@ -4,22 +4,24 @@ from visualize import *
 
 from curses import wrapper
 
-g = graph(less_hard)
-cbs = CBS_solver(g)
 #cbs.solve_puzzle()
 
 # TODO: Call solver with curses
 
-def main(stdscr):
+def main(stdscr, with_curses):
 
-    dd = drawer(g, stdscr, cbs.flows)
+    g = graph(less_hard)
+    d = drawer(g, stdscr)
+
+    cbs = CBS_solver(g, True, stdscr, d)
+
     stdscr.clear()
 
     stdscr.refresh()
 
     #dd.ww.win.addstr(0,0, 'HH')
     #dd.ww.draw_graph(g)
-    for window in dd.windows.values():
+    for window in d.windows.values():
         window.draw_graph(g)
         window.win.refresh()
 
@@ -28,6 +30,6 @@ def main(stdscr):
 
     stdscr.getkey()
 
-wrapper(main)
+wrapper(main, with_curses=True)
 #print (" ".join(g.display_one_line_graph(2)))
 #print(g.display_one_line_graph(2, 2)[-1])
