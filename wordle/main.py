@@ -22,13 +22,7 @@ def main(stdscr):
         status = ser.checkWord(attempt)
         bot.updateState(attempt, status)
 
-        # Show attempt
-        for i, letter in enumerate(attempt):
-
-            draw.display(stdscr, guess, i, letter, status[i])
-            time.sleep(0.3)
-
-        # Remove wrong letters
+        draw.display_word(stdscr, guess, attempt, status)
         draw.removeLetters(attempt, status)
 
         if set(status) == {2}:
@@ -38,13 +32,9 @@ def main(stdscr):
 
     # Print answer if failure
     if guess >= 6:
-        for i, letter in enumerate(ser.secretWord):
-            draw.display(stdscr, 6, i, letter, 3)
-            time.sleep(0.4)
+        draw.display_word(stdscr, 6, ser.secretWord, 3)
     else:
-        for i, letter in enumerate("Congratulations"):
-            draw.display(stdscr, 6, i-5, letter, 3)
-            time.sleep(0.2)
+        draw.display_word(stdscr, 6, "Congratulations", 3, 5)
 
     stdscr.getch()
 

@@ -67,6 +67,20 @@ class drawer():
 
         stdscr.refresh()
 
+    def display_word(self, stdscr, y, word, status, offset=0):
+
+        # jank to be able to use constant color
+        if not isinstance(status, list):
+
+            status = len(word) * [status]
+
+        for i, letter in enumerate(word):
+
+            letter_pos = i - offset
+
+            self.display(stdscr, y, letter_pos, letter, status[i])
+            time.sleep(0.3)
+
     def takeGuess(self, guess):
         """
         Draw guess at reasonable posistion and clear when new guess comes
