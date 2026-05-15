@@ -33,7 +33,7 @@ class boid(pygame.sprite.Sprite):
         # Params
         self.max_speed = 7
         self.sight_range = 80
-        self.wall_avoid_range = 100
+        self.wall_avoid_range = 75
         self.boid_avoid_range = 50
 
     def update(self):
@@ -99,14 +99,14 @@ class boid(pygame.sprite.Sprite):
                     perceived_center = perceived_center + pos
 
                     if distance_abs < self.boid_avoid_range:
-                        avoid_boid = avoid_boid + distance
+                        avoid_boid = avoid_boid + distance * (1 / (distance_abs + 0.01))
 
         if boids_in_range > 0:
 
             # Scale vectors
             perceived_center = ((perceived_center / boids_in_range) - self_pos) * 0.001
             perceived_velocity = (perceived_velocity / boids_in_range) - self.speed * 0.01
-            avoid_boid = avoid_boid * 0.05
+            avoid_boid = avoid_boid * 1
 
             # Boid perceived Center
             #pygame.draw.rect(screen, black, pygame.Rect(perceived_center, [5, 5]))
