@@ -65,21 +65,37 @@ class CBS_solver():
     Flow class keeps track of a single path, this keeps track of all tracks
     """
 
-    def __init__(self, graph, with_curses=False, curses=None, drawer=None):
+    def __init__(self, graph):
 
         self.flows = []
         self.graph = graph
-
-        # Only set curses variables if solver has curses scope
-        if with_curses:
-            self.curses = curses
-            self.drawer = drawer
-
-        self.with_curses = with_curses
+        self.iteration_count = 0
+        self.constraints = defaultdict(set)
+        self.heap = []
 
         # First make flow objects from all_terminals list
         for state, nodes in self.graph.terminals.items():
             self.flows.append(flow(self.graph, nodes, state))
+
+        # Initialize root CBS node and constraints
+        self.set_constraints(self.constraints)
+        paths = self.solve_terminals()
+        root = cbs_node(self.constraints, paths)
+        root_cost = (self.iteration_count, root)
+        self.push_to_heap(root_cost)
+
+    def push_to_heap(self, params):
+        """
+        params [ tuple ]:
+            order of elements decides prioritization
+        """
+
+        #heapq.heappush(self.heap, params)
+
+        # TEST #
+        # Treat HEAP as list (try every combination)
+        # Only take params[1] (actual node)
+        self.heap.append(params[1])
 
     def board_fill(self, paths):
 
@@ -122,32 +138,27 @@ class CBS_solver():
         """
         Sets state and returns board
 
-        Uses self.with_curses
-        with_curses [ bool  ]:
-            False   Print board
-
-            True    Return board with flow state
-
         flow [ flow object ]
 
         reset [ bool  ]:
-            True call graph.reset_node_states()
+            Reset nodes in path.
 
-            False dontnt' do that
+            i.e. call without reset, then with
         """
 
-        for n in flow.path:
-            n.state = flow.state.lower()
+        if reset == True:
+            for n in flow.path:
+                n.state = flow.state.lower()
 
-        # No curses
-        if self.with_curses == False:
-            if reset == True:
-                self.graph.display_graph()
-                self.graph.reset_node_states()
+            # TODO move this to main
+            #self.graph.display_graph()
+
+            # TODO check that flow.path faktisk ikke inneholder terminaler
+            self.graph.reset_node_states(nodes = flow.path)
 
         else:
-            if reset == True:
-                None
+            for n in flow.path:
+                n.state = flow.state.lower()
 
     def display_all_flows(self):
         """
@@ -213,12 +224,11 @@ class CBS_solver():
         # Solutions to check
         open = []
         heapq.heappush(open, (constraint_cost, cost, iteration_count, root))
+    
 
         while open:
 
             print ("---")
-
-            iteration_count += 1
 
             # Least constraints
             P = heapq.heappop(open)[-1]
@@ -251,6 +261,8 @@ class CBS_solver():
             node, flows = collissions[0]
             for flow in flows:
 
+                iteration_count += 1
+
                 # TODO: ????? Why does this work
                 node = collissions[0][0]
 
@@ -280,3 +292,89 @@ class CBS_solver():
                     self.graph.display_graph()
 
                 heapq.heappush(open, (node_cost, new_cost, iteration_count, new_cbs_node))
+
+    def solve_puzzle_single_iteration(self):
+
+        print (f"--- Iteration: {self.iteration_count} ---")
+
+        # Best potential node
+
+        # TEST #
+        # Take first element from "HEAP"
+        #P = heapq.heappop(self.heap)[-1]
+
+        try:
+
+            # En slags BREADTH FIRST
+            P = self.heap.pop(1)
+
+        except:
+
+            print ("No more solutions to test. unsolvable?")
+            return True
+
+        collissions = self.find_first_conflict(P.paths)
+
+        # Collissions return False, one flow didnt have a path
+        if not collissions:
+            print ("No path")
+
+            return False
+
+        # Solution is valid if no collissions
+        # TODO: Rework how i end the search, this is pure jank
+        if collissions == True:
+            print ("\nSolution Found")
+            self.graph.reset_node_states()
+            for flow, path in P.paths:
+                for node in path:
+                    node.state = flow.state.lower()
+            self.graph.display_graph()
+            print (self.iteration_count)
+            #return self.flows
+            return True
+
+        # TODO: Prettier logging. All DEBUG must play nice with curses
+        # DEBUG
+        for colli in collissions:
+            print (f"{colli[0].y, colli[0].x}: {*[x.state for x in colli[1]],}")
+
+        # Make 2 nodes, reduce breadth or smth
+        naughty_node, naughty_flows = collissions[0]
+        for flow in naughty_flows:
+
+            self.iteration_count += 1
+
+            # TODO: ????? Why does this work
+            naughty_node = collissions[0][0]
+
+            #new_constraints = {state: set(nodes) for state, nodes in P.constraints.items()}
+            # TODO String references ikke objecter. må recreate så mye
+            new_constraints = defaultdict(set, {
+                state: set(nodes) for state, nodes in P.constraints.items()
+            })
+            new_constraints[flow.state].add(naughty_node)
+
+            # DEBUG
+            for state, con in new_constraints.items():
+                print (f"{state}: {*[(x.y,x.x) for x in con],}")
+
+            self.set_constraints(new_constraints)
+            new_paths = self.solve_terminals()
+            new_cost = self.board_fill(new_paths)
+
+            new_cbs_node = cbs_node(new_constraints, new_paths)
+            node_cost = self.amount_constraints(new_constraints)
+
+            # Purely aestetic. Wrap into grap function or smth
+            for flow, path in P.paths:
+                print (" ")
+                self.graph.reset_node_states()
+                for node in path:
+                    node.state = flow.state.lower()
+                self.graph.display_graph()
+
+            #heapq.heappush(open, (node_cost, new_cost, iteration_count, new_cbs_node))
+
+            new_node_cost = (self.iteration_count, new_cbs_node)
+            self.push_to_heap(new_node_cost)

@@ -102,13 +102,20 @@ class graph():
         # Non terminals and * nodes
         self.usable_nodes = [x for x in self.nodes if x not in self.all_terminals and x.state != "*"]
 
-    def reset_node_states(self):
+    def reset_node_states(self, nodes=None):
         """
         Sets states to default symbol ".". keeps terminals same state
+
+        Warning: If nodes[] contains terminal it will overwrite
+
+        TODO perhaps make set node state
         """
 
-        # TODO Enable reset of given nodes?
-        for node in self.usable_nodes:
+        if nodes == None:
+            nodes = self.usable_nodes
+
+        # TODO is this safe?
+        for node in nodes:
             node.state = "."
 
     def display_one_line_graph(self, n, padding=1):
@@ -179,6 +186,7 @@ class graph():
                 if neigh in checked:
                     continue
 
+                # TODO: Call find neighbors on just n?
                 neigh.find_neighbors(
                     self.node_locations
                 )
