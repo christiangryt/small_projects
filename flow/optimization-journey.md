@@ -64,3 +64,7 @@ reset_node_states:
     Was 0.4s of total run time ~10% on _states:     
 
         Was 0.4s of total run time ~10% on less_hard board. Which is of medium size     
+
+# Better MAPF solutions
+
+https://arxiv.org/abs/2402.15546

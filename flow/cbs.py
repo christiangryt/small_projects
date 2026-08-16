@@ -295,8 +295,6 @@ class CBS_solver():
 
     def solve_puzzle_single_iteration(self):
 
-        print (f"--- Iteration: {self.iteration_count} ---")
-
         # Best potential node
 
         # TEST #
@@ -305,8 +303,9 @@ class CBS_solver():
 
         try:
 
-            # En slags BREADTH FIRST
-            P = self.heap.pop(1)
+            # pop(0) breadth first
+            # pop(-1) depth first
+            P = self.heap.pop(0)
 
         except:
 
@@ -344,6 +343,7 @@ class CBS_solver():
         for flow in naughty_flows:
 
             self.iteration_count += 1
+            print (f"--- Iteration: {self.iteration_count} ---")
 
             # TODO: ????? Why does this work
             naughty_node = collissions[0][0]
@@ -367,7 +367,7 @@ class CBS_solver():
             node_cost = self.amount_constraints(new_constraints)
 
             # Purely aestetic. Wrap into grap function or smth
-            for flow, path in P.paths:
+            for flow, path in new_paths:
                 print (" ")
                 self.graph.reset_node_states()
                 for node in path:
