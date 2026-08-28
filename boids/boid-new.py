@@ -6,11 +6,76 @@ pygame.init()                           # starte opp pygame
 size = width, height = 1520, 1040        # Bane
 clock = pygame.time.Clock()             # Klokka
 
-n = 200
+n = 1
 
 black = (0,0,0)
 white = (255,255,255)
 red = (255, 0, 0)
+
+# ==============
+# Spatial Hashing
+# ==============
+
+# based on window size divide into n chunks and find in hash table
+"""
+spatial_hash
+
+[x, y]
+    x index first
+    y index second
+"""
+spatial_hash = dict()
+grid_s = 64
+
+def create_hashes(width, height, n):
+    """
+    Given width and height create hash entries for grid size
+
+    width, height [int]
+        size of window
+
+    n [int]
+        size of grid (n by n)
+    """
+
+    x = width // n
+    y = height // n
+
+    for i in range(x):
+        for j in range(y):
+            spatial_hash[(i,j)] = []
+
+def get_spatial_grid(x, y):
+    """
+    Given Cooridinates of spatial hash grid return list of boids there
+    x [int]
+        axis
+
+    y [int]
+        axis
+    """
+
+    return spatial_hash.get((x,y), 0)
+
+def insert_into_grid(boid, grid_s):
+
+    old_grid = spatial_hash.get(boid.last_grid_x, boid.last_grid_y)
+    print (old_grid)
+    old_grid.remove(boid)
+
+    x = boid.x // grid_s
+    y = boid.y // grid_s
+
+    grid = spatial_hash.get((x,y), 0)
+
+    if grid != 0:
+
+        grid.append(boid)
+        boid.last_grid_x = x
+        boid.last_grid_y = y
+
+create_hashes(width, height, grid_s)
+print (spatial_hash)
 
 # ==============
 # Boid Class
@@ -30,6 +95,11 @@ class boid(pygame.sprite.Sprite):
         self.speed = pygame.math.Vector2(speed)
         self.position = pygame.math.Vector2(position)
 
+        self.last_grid_x = int(self.position.x) // grid_s
+        self.last_grid_y = int(self.position.y) // grid_s
+
+        insert_into_grid(self, grid_s)
+
         # Params
         self.max_speed = 7
         self.sight_range = 80
@@ -38,6 +108,8 @@ class boid(pygame.sprite.Sprite):
 
     def update(self):
         newpos = self.calcnewpos(self.rect, self.speed)
+
+        # with new pos move into correct sptial hash
 
         self.rect = newpos
 
@@ -51,6 +123,8 @@ class boid(pygame.sprite.Sprite):
     # Rules for Boids
     # ==============
     def dodge_walls(self):
+
+        "avoid edge of map, and also /structs/"
 
         away_from_wall_x = 0
         away_from_wall_y = 0
@@ -114,8 +188,10 @@ class boid(pygame.sprite.Sprite):
             # Avoid boid line
             #pygame.draw.line(screen, black, self_pos, avoid_boid)
 
-            self.speed = self.speed + perceived_center + perceived_velocity + avoid_boid + dodge_movement
+            self.speed = self.speed + perceived_center + perceived_velocity + avoid_boid
             #self.speed = self.speed + avoid_boid + dodge_movement
+
+        self.speed +=  dodge_movement
 
         # Visualize Boid Sight Range
         #pygame.draw.circle(self.screen, black, self.get_pos_vector(), self.sight_range, 1)
