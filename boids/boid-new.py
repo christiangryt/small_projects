@@ -6,11 +6,12 @@ pygame.init()                           # starte opp pygame
 size = width, height = 1520, 1040        # Bane
 clock = pygame.time.Clock()             # Klokka
 
-n = 1
+n = 200
 
 black = (0,0,0)
 white = (255,255,255)
 red = (255, 0, 0)
+green = (0, 255,0)
 
 # ==============
 # Spatial Hashing
@@ -27,55 +28,72 @@ spatial_hash
 spatial_hash = dict()
 grid_s = 64
 
-def create_hashes(width, height, n):
+def get_spatial_grid(boid, n):
     """
-    Given width and height create hash entries for grid size
+    Get grid list from spatial grid
 
-    width, height [int]
-        size of window
+    x [int]
+        positive of negative coordinate
+
+    y [int]
+        positive of negative coordinate
 
     n [int]
         size of grid (n by n)
+
+    return [list]
     """
 
-    x = width // n
-    y = height // n
+    grid_x = boid.position[0] // n
+    grid_y = boid.position[1] // n
 
-    for i in range(x):
-        for j in range(y):
-            spatial_hash[(i,j)] = []
+    return spatial_hash.get((grid_x,grid_y), [])
 
-def get_spatial_grid(x, y):
+def get_spatial_grid_dict_coords(x, y, n):
     """
-    Given Cooridinates of spatial hash grid return list of boids there
+    Get grid coords from coords
+
     x [int]
-        axis
+        left to right coordinat 
 
     y [int]
-        axis
+        up and down coordinate
+
+    n [int]
+        Size of grid (nxn)
     """
 
-    return spatial_hash.get((x,y), 0)
+    grid_x = x // n
+    grid_y = y // n
+
+    return grid_x, grid_y
 
 def insert_into_grid(boid, grid_s):
 
-    old_grid = spatial_hash.get(boid.last_grid_x, boid.last_grid_y)
-    print (old_grid)
-    old_grid.remove(boid)
+    old_coords = (boid.last_grid_x, boid.last_grid_y)
 
-    x = boid.x // grid_s
-    y = boid.y // grid_s
+    last_grid_x = int(boid.position[0] // grid_s)
+    last_grid_y = int(boid.position[1] // grid_s)
 
-    grid = spatial_hash.get((x,y), 0)
+    new_coords = (last_grid_x, last_grid_y)
 
-    if grid != 0:
+    try:
 
-        grid.append(boid)
-        boid.last_grid_x = x
-        boid.last_grid_y = y
+        if old_coords != new_coords:
+            grid = get_spatial_grid(boid, grid_s)
 
-create_hashes(width, height, grid_s)
-print (spatial_hash)
+            grid.append(boid)
+
+            boid.last_grid_x = last_grid_x
+            boid.last_grid_y = last_grid_y
+
+            spatial_hash[new_coords] = grid
+
+            del spatial_hash[old_coords]
+
+    except:
+        None
+
 
 # ==============
 # Boid Class
@@ -98,7 +116,6 @@ class boid(pygame.sprite.Sprite):
         self.last_grid_x = int(self.position.x) // grid_s
         self.last_grid_y = int(self.position.y) // grid_s
 
-        insert_into_grid(self, grid_s)
 
         # Params
         self.max_speed = 7
@@ -112,6 +129,10 @@ class boid(pygame.sprite.Sprite):
         # with new pos move into correct sptial hash
 
         self.rect = newpos
+
+        # update position vector
+        # Lowkye sikkert poopy TODO
+        self.position = [self.rect[0], self.rect[1]]
 
     def calcnewpos(self, rect, speed):
         return rect.move(speed)
@@ -199,6 +220,9 @@ class boid(pygame.sprite.Sprite):
         if self.speed.length() > self.max_speed:
             self.speed.scale_to_length(self.max_speed)
 
+        # Update grid position
+        insert_into_grid(self, grid_s)
+
 # ==============
 # Simulation vars
 # ==============
@@ -236,11 +260,24 @@ while running:
 
     screen.fill(white)
 
-    for b in instanser:
-        pygame.draw.rect(screen, red, b.rect)
+    # DEBUG, draws grid inhabited by boid
+    for k, v in spatial_hash.items():
+        #print (k)
+        x, y = k
 
+        left = x * grid_s
+        top = y * grid_s
+
+        r = pygame.Rect(left, top, grid_s, grid_s)
+
+        pygame.draw.rect(screen, green, r, 1)
+
+    for b in instanser:
         b.update_movement(instanser)
+
+        pygame.draw.rect(screen, red, b.rect)
         b.update()
+
 
     pygame.display.flip()
 

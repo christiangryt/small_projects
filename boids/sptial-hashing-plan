@@ -1,0 +1,13 @@
+Make dict with lists, representing a square in the grid. Since this is powered by pythons dict its an underlying hash table -> constant time lookup.
+
+When updating boids select a grid square and all the squares surrounding it
+
+| 1  | 2  | 3  | 4  | 5  |
+| 6  | 7  | 8  | 9  | 10 |
+| 11 | 12 | 13 | 14 | 15 |
+
+When updating square 1 select neighbors (2, 6, 7). Loop over all boids in square 1 following all unique pairs i.e. ab is the same as ba so that we skip that step. This lets me update both a and b in the same process as their affects on each other would be the same. (wait with this one)
+
+Then when updating square 2 get neighors (1, 3, 8, 7, 6), then loop through boids in square 2 as the previous step
+
+Boids still check if other boids are in sight range, but there should be less boids that need to be checked due to using grids. Each boid checks each other boid in the other square, but they should be able to update them, saving the same check in the opposite direction, i.e. when a check b and applies a force to itsself, b does not need to check a since that was done in the last iteration. How to loop over boids to avoid that issue i do not know though.
