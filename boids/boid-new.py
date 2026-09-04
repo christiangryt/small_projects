@@ -26,7 +26,6 @@ spatial_hash
     y index second
 """
 spatial_hash = dict()
-grid_s = 64
 
 def get_spatial_grid(boid, n):
     """
@@ -83,6 +82,8 @@ def insert_into_grid(boid, grid_s):
     grid.append(boid)
 
     spatial_hash[grid_coords] = grid
+
+grid_s = 80
 
 # ==============
 # Boid Class
@@ -248,7 +249,6 @@ while running:
             running = False
 
     screen.fill(white)
-    spatial_hash = dict()
 
     # DEBUG, draws grid inhabited by boid
     for k, v in spatial_hash.items():
@@ -261,6 +261,8 @@ while running:
         r = pygame.Rect(left, top, grid_s, grid_s)
 
         pygame.draw.rect(screen, green, r, 1)
+
+    spatial_hash = dict()
 
     for b in instanser:
         b.update_movement(instanser)
