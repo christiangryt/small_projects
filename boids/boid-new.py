@@ -69,31 +69,20 @@ def get_spatial_grid_dict_coords(x, y, n):
     return grid_x, grid_y
 
 def insert_into_grid(boid, grid_s):
-
-    old_coords = (boid.last_grid_x, boid.last_grid_y)
+    """
+    Take boid and append to grid
+    """
 
     last_grid_x = int(boid.position[0] // grid_s)
     last_grid_y = int(boid.position[1] // grid_s)
 
-    new_coords = (last_grid_x, last_grid_y)
+    grid_coords = (last_grid_x, last_grid_y)
 
-    try:
+    grid = get_spatial_grid(boid, grid_s)
 
-        if old_coords != new_coords:
-            grid = get_spatial_grid(boid, grid_s)
+    grid.append(boid)
 
-            grid.append(boid)
-
-            boid.last_grid_x = last_grid_x
-            boid.last_grid_y = last_grid_y
-
-            spatial_hash[new_coords] = grid
-
-            del spatial_hash[old_coords]
-
-    except:
-        None
-
+    spatial_hash[grid_coords] = grid
 
 # ==============
 # Boid Class
@@ -259,6 +248,7 @@ while running:
             running = False
 
     screen.fill(white)
+    spatial_hash = dict()
 
     # DEBUG, draws grid inhabited by boid
     for k, v in spatial_hash.items():

@@ -11,3 +11,5 @@ When updating square 1 select neighbors (2, 6, 7). Loop over all boids in square
 Then when updating square 2 get neighors (1, 3, 8, 7, 6), then loop through boids in square 2 as the previous step
 
 Boids still check if other boids are in sight range, but there should be less boids that need to be checked due to using grids. Each boid checks each other boid in the other square, but they should be able to update them, saving the same check in the opposite direction, i.e. when a check b and applies a force to itsself, b does not need to check a since that was done in the last iteration. How to loop over boids to avoid that issue i do not know though.
+
+Tried to rebuild entire dict every frame, worked like a charm
