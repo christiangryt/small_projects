@@ -1,0 +1,36 @@
+{
+  "personalia": {
+    "kontakt": "Kontakt",
+    "studentaddresse": "Studentadresse",
+    "name": "Navn Navn Navn",
+    "addresse_gate": "Hjemme bra",
+    "addresse_by": "Sted",
+    "email": "Mailen min",
+    "phone": "Ring meg på",
+    "studentaddresse_gate": "Student bor",
+    "studentaddresse_by": "Student Sted"
+  },
+  "sections": [
+    {
+      "name": "Skole",
+      "items": [
+        {
+          "place": "Skoleskolen",
+          "role": "_Eleven_",
+          "description": "Fag med mer *fag*",
+          "period": "_08/109 - 06/112_"
+        },
+        {
+          "place": "Livets skole",
+          "role": "Menneske",
+          "description": "Leve",
+          "period": "_01/100 - 06/164_"
+        }
+      ]
+    },
+    {
+      "name": "En ting",
+      "items": "Bare en ting går fint det og"
+    }
+  ]
+}
